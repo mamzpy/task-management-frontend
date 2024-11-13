@@ -1,41 +1,29 @@
-name: CI/CD Workflow
+name: Deploy
 
-on:
-  push:
-    branches:
-      - master  # Triggers on push to the master branch
-  pull_request:
-    branches:
-      - master  # Triggers on pull request to the master branch
+on: [workflow_dispatch]
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
+      - name: Git Checkout
         uses: actions/checkout@v2
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '14'  # Specify the Node.js version
+      - name: Yarn Cache
+        uses: c-hive/gha-yarn-cache@v1
 
       - name: Install dependencies
-        run: npm install
-        
-      - name: Run tests
-        run: npm test
+        run: yarn
 
-      - name: Build the app
-        env:  # Adding environment variables here
+      - name: Build React App
+        run: yarn build
+        env:
+          HTTPS: 'true'
           REACT_APP_BASE_URL: ${{ secrets.REACT_APP_BASE_URL }}
           PUBLIC_URL: ${{ secrets.PUBLIC_URL }}
-        run: npm run build  # Adjust the command if necessary for your app
 
-      - name: Deploy to Heroku
-        uses: akhileshns/heroku-deploy@v3.3.10
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          heroku_app_name: task-management-danny  # Replace with your Heroku app name
-          heroku_email: ${{ secrets.HEROKU_EMAIL }}  # Your Heroku account email
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}  # Heroku API key, stored in GitHub secrets
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
