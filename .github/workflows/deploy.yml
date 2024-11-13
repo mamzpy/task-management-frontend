@@ -28,6 +28,9 @@ jobs:
         run: npm test
 
       - name: Build the app
+        env:  # Adding environment variables here
+          REACT_APP_BASE_URL: ${{ secrets.REACT_APP_BASE_URL }}
+          PUBLIC_URL: ${{ secrets.PUBLIC_URL }}
         run: npm run build  # Adjust the command if necessary for your app
 
       - name: Deploy to Heroku
