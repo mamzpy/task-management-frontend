@@ -1,40 +1,42 @@
-name: Deploy
+name: CI/CD Workflow
 
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      - master  # Triggers on push to the master branch
+  pull_request:
+    branches:
+      - master  # Triggers on pull request to the master branch
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    
+
     steps:
-      - name: Git Checkout
+      - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '16'  # Specify the compatible Node.js version
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.x'  # Use the latest version of Python 3
-
-      - name: Yarn Cache
-        uses: c-hive/gha-yarn-cache@v1
+          node-version: '14'  # Specify the Node.js version
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm install
+        
+      - name: Run tests
+        run: npm test
 
-      - name: Build React App
-        run: yarn build
+      - name: Build the app
+        run: npm run build  # Adjust the command if necessary for your app
+
+      # Deployment step (update this according to your deployment method)
+      - name: Deploy to Production
         env:
-          HTTPS: 'true'
-          REACT_APP_BASE_URL: ${{ secrets.REACT_APP_BASE_URL }}
-          PUBLIC_URL: ${{ secrets.PUBLIC_URL }}
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
+          NODE_ENV: production
+          # Add any environment variables required for deployment
+          # for example: API_KEY: ${{ secrets.API_KEY }}
+        run: |
+          echo "Deploying to production..."  # Replace this with actual deployment commands
+          # Example command if deploying to a platform like Heroku:
+          # npm run deploy  # Or whatever command is used to deploy your app
