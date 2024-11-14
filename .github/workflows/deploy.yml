@@ -1,4 +1,4 @@
-Copyname: Deploy
+name: Deploy Task Management Frontend
 
 on: [workflow_dispatch]
 
@@ -13,7 +13,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: '2.x'
+          python-version: '3.x'
         
       - name: Yarn Cache
         uses: c-hive/gha-yarn-cache@v1
@@ -34,9 +34,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build
           PUBLIC_URL: ${{ secrets.PUBLIC_URL }}
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build
