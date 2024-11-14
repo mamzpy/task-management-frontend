@@ -4,7 +4,7 @@ on: [workflow_dispatch]
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     
     steps:
       - name: Git Checkout
@@ -18,20 +18,19 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '2.7'  # node-gyp requires Python 2.7
+          python-version: '2.7'
         
-      - name: Yarn Cache
-        uses: c-hive/gha-yarn-cache@v1
-        
-      - name: Install node-gyp
+      - name: Install node-gyp dependencies
         run: |
-          npm config set python /usr/bin/python2.7
-          npm install -g node-gyp@latest
+          npm config set python python2.7
+          npm install --global --production windows-build-tools
+          npm install --global node-gyp
+        shell: powershell
         
       - name: Install dependencies
         run: |
           npm config set legacy-peer-deps true
-          yarn install --frozen-lockfile
+          yarn install --network-timeout 100000
         
       - name: Build React App
         run: yarn build
