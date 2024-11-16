@@ -1,6 +1,9 @@
 name: Deploy Task Management Frontend
 
-on: [workflow_dispatch]
+on: 
+  push:
+    branches: [ main ]  # or your default branch
+  workflow_dispatch:
 
 jobs:
   deploy:
@@ -8,37 +11,26 @@ jobs:
     
     steps:
       - name: Git Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-        
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '2.7'
-        
-      - name: Install node-gyp dependencies
-        run: |
-          npm config set python python2.7
-          npm install --global --production windows-build-tools
-          npm install --global node-gyp
-        shell: powershell
+          cache: 'yarn'
         
       - name: Install dependencies
         run: |
           npm config set legacy-peer-deps true
-          yarn install --network-timeout 100000
+          yarn install --frozen-lockfile --network-timeout 100000
         
       - name: Build React App
-        run: yarn build
         env:
           CI: false
           HTTPS: 'true'
           REACT_APP_BASE_URL: ${{ secrets.REACT_APP_BASE_URL }}
           PUBLIC_URL: ${{ secrets.PUBLIC_URL }}
+        run: yarn build
         
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
