@@ -1,37 +1,39 @@
-name: Deploy Task Management Frontend
+name: Deploy React Frontend
 
-on: 
+on:
   push:
-    branches: [ main ]  # or your default branch
+    branches: [ main ]  # adjust this to your default branch name if different
   workflow_dispatch:
 
 jobs:
-  deploy:
-    runs-on: windows-latest
+  build-and-deploy:
+    runs-on: ubuntu-latest
     
     steps:
-      - name: Git Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
-        
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '18.x'
-          cache: 'yarn'
-        
-      - name: Install dependencies
+          node-version: '16.x'  # Using Node 16 for compatibility with your dependencies
+          cache: 'npm'
+
+      - name: Install cross-env globally
+        run: npm install -g cross-env
+
+      - name: Install Dependencies
         run: |
-          npm config set legacy-peer-deps true
-          yarn install --frozen-lockfile --network-timeout 100000
-        
+          npm install
+        env:
+          NODE_OPTIONS: "--max_old_space_size=4096"
+
       - name: Build React App
+        run: npm run build
         env:
           CI: false
-          HTTPS: 'true'
-          REACT_APP_BASE_URL: ${{ secrets.REACT_APP_BASE_URL }}
-          PUBLIC_URL: ${{ secrets.PUBLIC_URL }}
-        run: yarn build
-        
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
